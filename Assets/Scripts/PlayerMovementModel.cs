@@ -23,8 +23,12 @@ public class PlayerMovementModel : MonoBehaviour {
     [Range(0f, 1f)]
     private float relativeSlideStopThreshold = 0.0001f;
 
+    [SerializeField]
+    [Range(0f, 1f)]
     private float relativeAscendingSlideDecay = 0.1f;
 
+    [SerializeField]
+    [Range(0f, 1f)]
     private float relativeHorizontalSlideDecay = 0.05f;
 
     private bool holdingSlide = false;
@@ -41,9 +45,7 @@ public class PlayerMovementModel : MonoBehaviour {
 	void Start () {
         controller = GetComponent<MovementController>();
 
-        gravity = -2 * jumpHeight / Mathf.Pow(timeToJumpApex, 2f);
-        jumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
-        print("Gravity: " + gravity + " Jump Velocity: " + jumpVelocity);
+        ResetGravity();
 
         slideVelocityThreshold = relativeSlideThreshold * moveSpeed;
         slideVelocityStopThreshold = relativeSlideStopThreshold * moveSpeed;
@@ -57,7 +59,7 @@ public class PlayerMovementModel : MonoBehaviour {
             velocity.y = 0;
         }
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        if (Input.GetKeyDown(KeyCode.LeftControl))
+        if (Input.GetKeyDown(KeyCode.LeftControl) && controller.collisions.below)
         {
             isSliding = true;
         }
@@ -102,5 +104,17 @@ public class PlayerMovementModel : MonoBehaviour {
         }
 
         return inputX * moveSpeed;
+    }
+
+    public void ZeroGravity()
+    {
+        gravity = 0f;
+        jumpVelocity = 0f;
+    }
+    public void ResetGravity()
+    {
+        gravity = -2 * jumpHeight / Mathf.Pow(timeToJumpApex, 2f);
+        jumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
+        print("Gravity: " + gravity + " Jump Velocity: " + jumpVelocity);
     }
 }
