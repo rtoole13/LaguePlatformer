@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent (typeof (Controller2d))]
+[RequireComponent (typeof (MovementController))]
 public class PlayerMovementModel : MonoBehaviour {
 
     public float jumpHeight = 4;
@@ -37,9 +37,9 @@ public class PlayerMovementModel : MonoBehaviour {
     private float slideVelocityThreshold;
     private Vector3 velocity;
 
-    Controller2d controller;
+    MovementController controller;
 	void Start () {
-        controller = GetComponent<Controller2d>();
+        controller = GetComponent<MovementController>();
 
         gravity = -2 * jumpHeight / Mathf.Pow(timeToJumpApex, 2f);
         jumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
@@ -103,10 +103,4 @@ public class PlayerMovementModel : MonoBehaviour {
 
         return inputX * moveSpeed;
     }
-    #region DEBUG
-    private void UpdateParameters()
-    {
-
-    }
-    #endregion //DEBUG
 }
