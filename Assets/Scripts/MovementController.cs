@@ -112,7 +112,7 @@ public class MovementController : MonoBehaviour {
     {
         float directionY = Mathf.Sign(translate.y);
         float rayLength = Mathf.Abs(translate.y) + skinWidth;
-
+        
         for (int i = 0; i < verticalRayCount; i++)
         {
             Vector2 rayOrigin = (directionY == -1) ? raycastOrigins.botLeft : raycastOrigins.topLeft;
@@ -149,7 +149,6 @@ public class MovementController : MonoBehaviour {
                     collisions.slopeAngle = slopeAngle;
                 }
             }
-
         }
     }
 

@@ -68,7 +68,6 @@ public class PlayerMovementModel : MonoBehaviour {
             currentSlideSpeedTarget = slideSpeed;
             isSliding = false;
         }
-        
         if (Input.GetKeyDown(KeyCode.Space) && controller.collisions.below)
         {
             velocity.y = jumpVelocity;
@@ -108,8 +107,8 @@ public class PlayerMovementModel : MonoBehaviour {
 
     public void ZeroGravity()
     {
-        gravity = 0f;
-        jumpVelocity = 0f;
+        gravity = -1f;
+        //jumpVelocity = 0f;
     }
     public void ResetGravity()
     {
