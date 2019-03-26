@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Emitter : MonoBehaviour
 {
-    Emission emission;
+    Field field;
     public float timeBetweenEmission;
     public float emissionDuration;
     public float whenToStartWarn;
@@ -24,7 +24,7 @@ public class Emitter : MonoBehaviour
         warnTimer = whenToStartWarn;
 
         warnTime = emissionDuration - whenToStartWarn;
-        emission = gameObject.GetComponentInChildren<Emission>();
+        field = gameObject.GetComponentInChildren<Field>();
     }
 
     void Update()
@@ -35,7 +35,7 @@ public class Emitter : MonoBehaviour
             if (CheckEmissionTimerExpired())
             {
                 emitting = true;
-                emission.Emit();
+                field.Emit();
             }
         }
         else
@@ -47,14 +47,14 @@ public class Emitter : MonoBehaviour
                 {
                     warning = true;
                     warnTimer = whenToStartWarn;
-                    emission.Warn();
+                    field.Warn();
                 }
             }
             if (CheckDurationTimerExpired())
             {
                 emitting = false;
                 warning = false;
-                emission.DisableEmit();
+                field.DisableEmit();
             }
         }
     }

@@ -3,21 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class Emission : MonoBehaviour
+public class Field : MonoBehaviour
 {
-    public UnityEvent enteredEmission;
-    public UnityEvent exitedEmission;
     private MeshRenderer meshRenderer;
     private BoxCollider2D boxCollider;
+
+    protected string enterMessage = " entered a field!";
+    protected string exitMessage = " exited a field!";
 
     private void Awake()
     {
         meshRenderer = GetComponent<MeshRenderer>();
         boxCollider = GetComponent<BoxCollider2D>();
-    }
-    void Start()
-    {
-
     }
 
     public virtual void Warn()
@@ -40,10 +37,16 @@ public class Emission : MonoBehaviour
 
     public virtual void OnTriggerEnter2D(Collider2D collision)
     {
-        enteredEmission.Invoke();
+        Debug.Log(collision.gameObject.name + enterMessage);
+        IFieldAffected fieldAffected = collision.GetComponent<IFieldAffected>();
+        if (fieldAffected != null)
+            fieldAffected.OnFieldEnter(this);
     }
     public virtual void OnTriggerExit2D(Collider2D collision)
     {
-        exitedEmission.Invoke();
+        Debug.Log(collision.gameObject.name + exitMessage);
+        IFieldAffected fieldAffected = collision.GetComponent<IFieldAffected>();
+        if (fieldAffected != null)
+            fieldAffected.OnFieldExit(this);
     }
 }

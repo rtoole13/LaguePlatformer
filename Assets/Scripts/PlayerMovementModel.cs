@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent (typeof (MovementController))]
-public class PlayerMovementModel : MonoBehaviour {
+public class PlayerMovementModel : MovementModel {
 
     public float jumpHeight = 4;
     public float timeToJumpApex = 0.4f;
@@ -31,20 +30,18 @@ public class PlayerMovementModel : MonoBehaviour {
     [Range(0f, 1f)]
     private float relativeHorizontalSlideDecay = 0.05f;
 
-    private bool holdingSlide = false;
+    private bool justLanded = false;
     private float currentSlideSpeedTarget;
     private bool isSliding = false;
-    private float gravity;
+    
     private float velocityXsmoothing;
     private float jumpVelocity;
     private float slideVelocityStopThreshold;
     private float slideVelocityThreshold;
     private Vector3 velocity;
 
-    MovementController controller;
-	void Start () {
-        controller = GetComponent<MovementController>();
-
+	protected override void Start () {
+        base.Start();
         ResetGravity();
 
         slideVelocityThreshold = relativeSlideThreshold * moveSpeed;
@@ -54,12 +51,24 @@ public class PlayerMovementModel : MonoBehaviour {
     }
 	
 	void Update () {
+        justLanded = !controller.collisions.below;
+        //collision from above or below, stop velocity y
         if (controller.collisions.above || controller.collisions.below)
         {
-            velocity.y = 0;
+            if (justLanded)
+            {
+                Debug.Log("Landed");
+                velocity.y = 0;
+            }
+            else
+            {
+                velocity.y = 0;
+            }
         }
+        //Debug.Log(justLanded);
+        //Get player input
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        if (Input.GetKeyDown(KeyCode.LeftControl) && controller.collisions.below)
+        if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             isSliding = true;
         }
@@ -78,41 +87,42 @@ public class PlayerMovementModel : MonoBehaviour {
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXsmoothing, (controller.collisions.below)?accelerationTimeGrounded:accelerationTimeAirborne);
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+
+        
 	}
 
     private float GetTargetVelocityX(float inputX)
     {
-        if (isSliding)
+        if (isSliding && controller.collisions.below)
         {
+            //On the ground and sliding
             if (controller.collisions.descendingSlope)
             {
+                //Descending a slope, slide speed is constant
                 return inputX * slideSpeed;
             }
             else {
                 if (controller.collisions.climbingSlope)
                 {
+                    //climbing a slope while sliding
                     currentSlideSpeedTarget *= (1f - relativeAscendingSlideDecay);
                 }
                 else
                 {
+                    //sliding on a horizontal
                     currentSlideSpeedTarget *= (1f - relativeHorizontalSlideDecay);
                 }
                 
-                return (controller.collisions.climbingSlope)? inputX * currentSlideSpeedTarget : inputX * currentSlideSpeedTarget;
+                return  inputX * currentSlideSpeedTarget;
             }
         }
 
         return inputX * moveSpeed;
     }
 
-    public void ZeroGravity()
+    public override void ResetGravity()
     {
-        gravity = -1f;
-        //jumpVelocity = 0f;
-    }
-    public void ResetGravity()
-    {
-        gravity = -2 * jumpHeight / Mathf.Pow(timeToJumpApex, 2f);
+        gravity = -2f * jumpHeight / Mathf.Pow(timeToJumpApex, 2f);
         jumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
         print("Gravity: " + gravity + " Jump Velocity: " + jumpVelocity);
     }
