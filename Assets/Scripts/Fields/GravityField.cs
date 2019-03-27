@@ -14,15 +14,23 @@ public class GravityField : Field
     public override void OnTriggerEnter2D(Collider2D collision)
     {
         Debug.Log(collision.gameObject.name + enterMessage);
-        IGravityFieldAffected fieldAffected = collision.GetComponent<IGravityFieldAffected>();
-        if (fieldAffected != null)
+        IFieldAffected fieldAffected = collision.GetComponent<IFieldAffected>();
+        MovementModel movementModel = collision.GetComponent<MovementModel>();
+        if (fieldAffected != null && movementModel != null)
+        {
             fieldAffected.OnFieldEnter(this);
+            movementModel.SetGravity(gravityValue);
+        }
     }
     public override void OnTriggerExit2D(Collider2D collision)
     {
         Debug.Log(collision.gameObject.name + exitMessage);
-        IGravityFieldAffected fieldAffected = collision.GetComponent<IGravityFieldAffected>();
-        if (fieldAffected != null)
+        IFieldAffected fieldAffected = collision.GetComponent<IFieldAffected>();
+        MovementModel movementModel = collision.GetComponent<MovementModel>();
+        if (fieldAffected != null && movementModel != null)
+        {
             fieldAffected.OnFieldExit(this);
+            movementModel.ResetGravity();
+        }
     }
 }

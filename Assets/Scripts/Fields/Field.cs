@@ -5,8 +5,8 @@ using UnityEngine.Events;
 
 public class Field : MonoBehaviour
 {
-    private MeshRenderer meshRenderer;
-    private BoxCollider2D boxCollider;
+    protected MeshRenderer meshRenderer;
+    protected BoxCollider2D boxCollider;
 
     protected string enterMessage = " entered a field!";
     protected string exitMessage = " exited a field!";

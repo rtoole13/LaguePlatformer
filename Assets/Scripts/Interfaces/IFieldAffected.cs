@@ -5,14 +5,6 @@ using UnityEngine;
 
 public interface IFieldAffected
 {
-    void OnFieldEnter(Field field);
-    void OnFieldExit(Field field);
+    void OnFieldEnter<T> (T field);
+    void OnFieldExit<T> (T field);
 }
-
-public interface IGravityFieldAffected
-{
-    void OnFieldEnter(GravityField field);
-    void OnFieldExit(GravityField field);
-}
-
-
