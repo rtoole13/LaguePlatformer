@@ -9,18 +9,23 @@ public class MovementController : MonoBehaviour {
     public int horizontalRayCount = 4;
     public int verticalRayCount = 4;
 
-    const float skinWidth = 0.015f;
-    
-    private float maxClimbAngle = 50;
-    private float maxDescendAngle = 75;
+    public const float skinWidth = 0.015f;
+
+    public float maxClimbAngle { get; private set; }
+    public float maxDescendAngle { get; private set; }
 
     private float horizontalRaySpacing;
     private float verticalRaySpacing;
 
     private BoxCollider2D boxColl;
-    private RaycastOrigins raycastOrigins;
+    public RaycastOrigins raycastOrigins;
     public CollisionInfo collisions;
 
+    private void Awake()
+    {
+        maxClimbAngle = 50;
+        maxDescendAngle = 70;
+    }
     // Use this for initialization
     void Start () {
         boxColl = GetComponent<BoxCollider2D>();
@@ -216,6 +221,13 @@ public class MovementController : MonoBehaviour {
             slopeAngle = 0;
         }
     }
+
+    public struct RaycastOrigins
+    {
+        public Vector2 topLeft, topRight;
+        public Vector2 botLeft, botRight;
+    }
+
     void CalculateRaySpacing()
     {
         Bounds bounds = boxColl.bounds;
@@ -228,12 +240,6 @@ public class MovementController : MonoBehaviour {
         verticalRaySpacing = bounds.size.x / (verticalRayCount - 1);
 
     }
-
-    
 }
 
-struct RaycastOrigins
-{
-    public Vector2 topLeft, topRight;
-    public Vector2 botLeft, botRight;
-}
+
