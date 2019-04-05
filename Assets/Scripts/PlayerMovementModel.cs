@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(PlayerInputModel))]
 public class PlayerMovementModel : MovementModel {
 
     public float jumpHeight = 4;
@@ -8,36 +9,29 @@ public class PlayerMovementModel : MovementModel {
 
     [SerializeField]
     private float accelerationTimeAirborne = 0.5f;
-
     [SerializeField]
     private float accelerationTimeGrounded = 0.1f;
-
     [SerializeField]
     private float accelerationTimeRecentlyLanded = 0.05f;
-
     [SerializeField]
     private float moveSpeed = 10f;
-
     [SerializeField]
     private float slideSpeed = 15f;
-
     [SerializeField]
     [Range(0f,1f)]
     private float relativeSlideThreshold = 0.5f;
-
     [SerializeField]
     [Range(0f, 1f)]
     private float relativeSlideStopThreshold = 0.0001f;
-
     [SerializeField]
     [Range(0f, 1f)]
     private float relativeAscendingSlideDecay = 0.1f;
-
     [SerializeField]
     [Range(0f, 1f)]
     private float relativeHorizontalSlideDecay = 0.05f;
 
-  
+    private PlayerInputModel playerInput;
+        
     private bool isAirborne = false;
     private bool recentlyLanded = false;
 
@@ -46,7 +40,6 @@ public class PlayerMovementModel : MovementModel {
     private float overrideDirection = 1f;
 
     private bool overrideSlide = false;
-    private bool isSliding = false;
     
     private float velocityXsmoothing;
     private float jumpVelocity;
@@ -55,7 +48,11 @@ public class PlayerMovementModel : MovementModel {
     private float slideVelocityThreshold;
     private Vector3 velocity;
 
-	protected override void Start () {
+    private void Awake()
+    {
+        playerInput = GetComponent<PlayerInputModel>();
+    }
+    protected override void Start () {
         base.Start();
         ResetGravity();
 
@@ -67,7 +64,6 @@ public class PlayerMovementModel : MovementModel {
     }
 	
 	void Update () {
-
         recentlyLanded = false;
 
         //collision from above or below, stop velocity y
@@ -83,25 +79,16 @@ public class PlayerMovementModel : MovementModel {
                 recentlyLanded = true;
                 currentOverrideSpeedTarget = velocity.magnitude;
             }
-                
-            
             velocity.y = 0;
         }
         //Get player input
-        Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        if (Input.GetKeyDown(KeyCode.LeftControl))
-        {
-            isSliding = true;
-        }
-        else if (Input.GetKeyUp(KeyCode.LeftControl))
-        {
+        Vector2 input = playerInput.movement;
+        if (!playerInput.sliding)
             currentSlideSpeedTarget = slideSpeed;
-            isSliding = false;
-        }
-        if (Input.GetKeyDown(KeyCode.Space) && controller.collisions.below)
+        
+        if (playerInput.jump && controller.collisions.below)
         {
             velocity.y = jumpVelocity;
-            isSliding = false;
         }
 
         float targetVelocityX = GetTargetVelocityX(input.x);
@@ -165,7 +152,7 @@ public class PlayerMovementModel : MovementModel {
         }
 
         //normal controls
-        if (isSliding && controller.collisions.below)
+        if (playerInput.sliding && controller.collisions.below)
         {   
             //On the ground and sliding
             if (controller.collisions.descendingSlope)
