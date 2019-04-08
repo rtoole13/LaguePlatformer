@@ -18,6 +18,8 @@ public class PlayerMovementModel : MovementModel {
     [SerializeField]
     private float slideSpeed = 15f;
     [SerializeField]
+    private float maxGroundSpeed = 40f;
+    [SerializeField]
     [Range(0f,1f)]
     private float relativeSlideThreshold = 0.5f;
     [SerializeField]
@@ -106,6 +108,7 @@ public class PlayerMovementModel : MovementModel {
 
     private float GetTargetVelocityX(float inputX)
     {
+        float velocityTargetX = inputX * moveSpeed;
         if (controller.collisions.below)
         {
             //grounded
@@ -114,21 +117,24 @@ public class PlayerMovementModel : MovementModel {
             float slopeAngle = Vector2.Angle(slopeNormal, Vector2.up);
             if (recentlyLanded && slopeAngle >= landingSlideAngleThreshold)
             {
+                //ignore smooth damping
                 return DetermineLandingVelocity(inputX, slopeNormal);
             }
             if (overrideSlide)
             {
-                return Mathf.SmoothDamp(velocity.x, DetermineOverrideSlideVelocity(inputX, slopeNormal), ref velocityXsmoothing, accelerationTimeGrounded);
+                velocityTargetX = DetermineOverrideSlideVelocity(inputX, slopeNormal);
             }
             if (slopeAngle <= slipAngleThreshold)
             {
-                return Mathf.SmoothDamp(velocity.x, DetermineVelocityNormal(inputX), ref velocityXsmoothing, accelerationTimeGrounded);
+                velocityTargetX = DetermineVelocityNormal(inputX);
             }
             else
             {
-                return Mathf.SmoothDamp(velocity.x, DetermineVelocitySlipSlope(slopeNormal), ref velocityXsmoothing, accelerationTimeGrounded);
+                velocityTargetX = DetermineVelocitySlipSlope(slopeNormal);
             }
+            return Mathf.SmoothDamp(velocity.x, velocityTargetX, ref velocityXsmoothing, accelerationTimeGrounded);
         }
+
 
         //airborne
         return Mathf.SmoothDamp(velocity.x, inputX * moveSpeed, ref velocityXsmoothing, accelerationTimeAirborne);
@@ -137,7 +143,17 @@ public class PlayerMovementModel : MovementModel {
     {
         overrideDirection = Mathf.Sign(slopeNormal.x);
         overrideSlide = true;
-        overrideSlideSpeedTarget = Mathf.Abs(Vector2.Dot(landingVelocity, Vector2.Perpendicular(slopeNormal)));
+        if (inputX * overrideDirection > 0)
+        {
+            //moving in override direction
+            overrideSlideSpeedTarget = Mathf.Clamp(Mathf.Abs(Vector2.Dot(landingVelocity, Vector2.Perpendicular(slopeNormal))), 0f, maxGroundSpeed);
+        }
+        else
+        {
+            //opposing override direction
+            overrideSlideSpeedTarget = Mathf.Clamp(Mathf.Abs(Vector2.Dot(landingVelocity, Vector2.Perpendicular(slopeNormal))),0f, maxGroundSpeed);
+        }
+        
 
         return overrideDirection * overrideSlideSpeedTarget;
     }
