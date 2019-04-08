@@ -23,7 +23,7 @@ public class MovementController : MonoBehaviour {
 
     private void Awake()
     {
-        maxClimbAngle = 50;
+        maxClimbAngle = 65;
         maxDescendAngle = 70;
     }
     // Use this for initialization
@@ -220,6 +220,35 @@ public class MovementController : MonoBehaviour {
             slopeAngleOld = slopeAngle;
             slopeAngle = 0;
         }
+    }
+
+    public Vector2 GetSlopeNormal(float currentDirection)
+    {
+        if (!collisions.below)
+            return Vector2.up;
+
+        Vector2 rayOrigin = (currentDirection == -1) ? raycastOrigins.botRight : raycastOrigins.botLeft;
+        RaycastHit2D hit = Physics2D.Raycast(rayOrigin, -Vector2.up, Mathf.Infinity, collisionMask);
+
+        if (hit)
+        {
+            return hit.normal;
+        }
+        return Vector2.up;
+    }
+    public float GetSlopeAngle(float currentDirection)
+    {
+        if (!collisions.below)
+            return 0f;
+
+        Vector2 rayOrigin = (currentDirection == -1) ? raycastOrigins.botRight : raycastOrigins.botLeft;
+        RaycastHit2D hit = Physics2D.Raycast(rayOrigin, -Vector2.up, Mathf.Infinity, collisionMask);
+
+        if (hit)
+        {
+            return Vector2.Angle(hit.normal, Vector2.up);
+        }
+        return 0f;
     }
 
     public struct RaycastOrigins
