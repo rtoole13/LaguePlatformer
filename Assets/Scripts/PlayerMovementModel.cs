@@ -18,6 +18,8 @@ public class PlayerMovementModel : MovementModel {
     [SerializeField]
     private float slideSpeed = 15f;
     [SerializeField]
+    private float slipSpeed = 5f;
+    [SerializeField]
     private float maxGroundSpeed = 40f;
     [SerializeField]
     [Range(0f,1f)]
@@ -35,16 +37,13 @@ public class PlayerMovementModel : MovementModel {
     private PlayerInputModel playerInput;
 
     private float slipAngleThreshold = 35f;
-    private float landingSlideAngleThreshold = 5f;
+    private float landingSlideAngleThreshold = 25f;
     private bool isAirborne = false;
     private bool recentlyLanded = false;
+    private float slipSpeedDamp = 0.5f;
 
     private float currentSlideSpeedTarget;
     private Vector2 landingVelocity;
-    private float overrideSlideSpeedTarget;
-    private float overrideDirection = 1f;
-
-    private bool overrideSlide = false;
     
     private float velocityXsmoothing;
     private float jumpVelocity;
@@ -52,6 +51,7 @@ public class PlayerMovementModel : MovementModel {
     private float slideVelocityStopThreshold;
     private float slideVelocityThreshold;
     private Vector3 velocity;
+    
 
     private void Awake()
     {
@@ -65,7 +65,6 @@ public class PlayerMovementModel : MovementModel {
         slideVelocityStopThreshold = relativeSlideStopThreshold * moveSpeed;
 
         currentSlideSpeedTarget = slideSpeed;
-        overrideSlideSpeedTarget = slideSpeed;
         landingVelocity = new Vector2(slideSpeed, 0f);
     }
 	
@@ -120,17 +119,13 @@ public class PlayerMovementModel : MovementModel {
                 //ignore smooth damping
                 return DetermineLandingVelocity(inputX, slopeNormal);
             }
-            if (overrideSlide)
-            {
-                velocityTargetX = DetermineOverrideSlideVelocity(inputX, slopeNormal);
-            }
             if (slopeAngle <= slipAngleThreshold)
             {
                 velocityTargetX = DetermineVelocityNormal(inputX);
             }
             else
             {
-                velocityTargetX = DetermineVelocitySlipSlope(slopeNormal);
+                velocityTargetX = DetermineVelocitySlipSlope(inputX, slopeNormal);
             }
             return Mathf.SmoothDamp(velocity.x, velocityTargetX, ref velocityXsmoothing, accelerationTimeGrounded);
         }
@@ -141,9 +136,9 @@ public class PlayerMovementModel : MovementModel {
     }
     private float DetermineLandingVelocity(float inputX, Vector2 slopeNormal)
     {
-        overrideDirection = Mathf.Sign(slopeNormal.x);
-        overrideSlide = true;
-        if (inputX * overrideDirection > 0)
+        float overrideDirection = Mathf.Sign(slopeNormal.x);
+        float overrideSlideSpeedTarget;
+        if (velocity.x * overrideDirection > 0)
         {
             //moving in override direction
             overrideSlideSpeedTarget = Mathf.Clamp(Mathf.Abs(Vector2.Dot(landingVelocity, Vector2.Perpendicular(slopeNormal))), 0f, maxGroundSpeed);
@@ -151,22 +146,15 @@ public class PlayerMovementModel : MovementModel {
         else
         {
             //opposing override direction
-            overrideSlideSpeedTarget = Mathf.Clamp(Mathf.Abs(Vector2.Dot(landingVelocity, Vector2.Perpendicular(slopeNormal))),0f, maxGroundSpeed);
+            Vector2 velocityTarget = landingVelocity;
+            velocityTarget.x = landingVelocity.x - velocity.x;
+            overrideSlideSpeedTarget = Mathf.Clamp(Mathf.Abs(Vector2.Dot(velocityTarget, Vector2.Perpendicular(slopeNormal))), 0f, maxGroundSpeed);
         }
         
 
         return overrideDirection * overrideSlideSpeedTarget;
     }
-    private float DetermineOverrideSlideVelocity(float inputX, Vector2 slopeNormal)
-    {
-        overrideSlideSpeedTarget *= (1f - relativeHorizontalSlideDecay);
-        if (overrideSlideSpeedTarget <= slideSpeed)
-        {
-            currentSlideSpeedTarget = slideSpeed;
-            overrideSlide = false;
-        }
-        return overrideDirection * overrideSlideSpeedTarget;
-    }
+
     private float DetermineVelocityNormal(float inputX)
     {
         if (playerInput.sliding)
@@ -196,9 +184,14 @@ public class PlayerMovementModel : MovementModel {
         return inputX * moveSpeed;
     }
 
-    private float DetermineVelocitySlipSlope(Vector2 slopeNormal)
+    private float DetermineVelocitySlipSlope(float inputX, Vector2 slopeNormal)
     {
-        return velocity.x + (Mathf.Sign(slopeNormal.x) * 5f);
+        if (inputX * slopeNormal.x > 0)
+        {
+            //moving in override direction
+            return inputX * slideSpeed;
+        }
+        return Mathf.Clamp((1-slipSpeedDamp) * velocity.x + (Mathf.Sign(slopeNormal.x) * slipSpeed), -maxGroundSpeed, maxGroundSpeed);
     }
 
     public override void ResetGravity()

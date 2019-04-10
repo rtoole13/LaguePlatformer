@@ -79,14 +79,16 @@ public class MovementController : MonoBehaviour {
             Debug.DrawRay(rayOrigin, Vector2.right * directionX * rayLength, Color.red);
             if (hit)
             {
-                if (collisions.descendingSlope)
-                {
-                    collisions.descendingSlope = false;
-                    translate = collisions.translateOld;
-                }
+                
                 float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
                 if (i == 0 && slopeAngle <= maxClimbAngle)
                 {
+                    if (collisions.descendingSlope)
+                    {
+                        collisions.descendingSlope = false;
+                        translate = collisions.translateOld;
+                    }
+
                     float distanceToSlopeStart = 0;
                     if (slopeAngle != collisions.slopeAngleOld)
                     {
@@ -132,6 +134,7 @@ public class MovementController : MonoBehaviour {
 
                 if (collisions.climbingSlope)
                 {
+                    Debug.Log("weee");
                     translate.x = translate.y * Mathf.Sign(translate.x) / Mathf.Tan(collisions.slopeAngle * Mathf.Deg2Rad);
                 }
                 collisions.below = directionY == -1;
@@ -169,6 +172,7 @@ public class MovementController : MonoBehaviour {
             collisions.below = true;
             collisions.climbingSlope = true;
             collisions.slopeAngle = slopeAngle;
+            
         }
     }
 
