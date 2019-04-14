@@ -50,7 +50,7 @@ public class PlayerMovementModel : MovementModel {
 
     private float slideVelocityStopThreshold;
     private float slideVelocityThreshold;
-    private Vector3 velocity;
+    
     
 
     private void Awake()
