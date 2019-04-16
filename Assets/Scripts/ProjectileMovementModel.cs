@@ -42,11 +42,13 @@ public class ProjectileMovementModel : MovementModel
         controller.Move(velocity * Time.deltaTime);
 
     }
+
     public void Initialize(Vector2 velocityTarget, float dragCoefficient)
     {
         drag = dragCoefficient;
         SetVelocity(velocityTarget);
     }
+
     private void SetVelocity(Vector2 velocityTarget)
     {
         velocity = velocityTarget;

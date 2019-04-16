@@ -16,6 +16,7 @@ public class PlayerInputModel : MonoBehaviour, ICanFire
     //events
     public event JumpAction OnJump;
     public event FireAction OnFire;
+    public event AltFireAction OnAltFire;
     #endregion //EVENTS
     void Start()
     {
@@ -41,11 +42,19 @@ public class PlayerInputModel : MonoBehaviour, ICanFire
         {
             InvokeFire();
         }
+        if (Input.GetMouseButtonDown(1))
+        {
+            InvokeAltFire();
+        }
     }
     void InvokeFire()
     {
-        
         Vector3 direction = Vector3.Normalize(Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position); //WARNING Vector3 stuff. If we do anything with zepth,  we may run into some weirdness here.
         OnFire(direction);
+    }
+    void InvokeAltFire()
+    {
+        Vector3 direction = Vector3.Normalize(Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position); //WARNING Vector3 stuff. If we do anything with zepth,  we may run into some weirdness here.
+        OnAltFire(direction);
     }
 }
