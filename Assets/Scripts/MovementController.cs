@@ -8,7 +8,6 @@ public class MovementController : MonoBehaviour {
     public LayerMask collisionMask;
     public int horizontalRayCount = 4;
     public int verticalRayCount = 4;
-
     public const float skinWidth = 0.015f;
 
     public float maxClimbAngle { get; private set; }

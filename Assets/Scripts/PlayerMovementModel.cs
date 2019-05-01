@@ -53,8 +53,9 @@ public class PlayerMovementModel : MovementModel {
     
     
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         playerInput = GetComponent<PlayerInputModel>();
     }
     protected override void Start () {
@@ -68,7 +69,8 @@ public class PlayerMovementModel : MovementModel {
         landingVelocity = new Vector2(slideSpeed, 0f);
     }
 	
-	void Update () {
+	protected override void Update () {
+        float deltaTime = Time.deltaTime;
         recentlyLanded = false;
 
         //collision from above or below, stop velocity y
@@ -97,12 +99,13 @@ public class PlayerMovementModel : MovementModel {
         }
 
         velocity.x = GetTargetVelocityX(input.x);
-        velocity.y += gravity * Time.deltaTime;
+        velocity.y += gravity * deltaTime;
+
+        if (effectedByExternalForces)
+            applyForces(ref velocity, deltaTime);
 
         isAirborne = !controller.collisions.below;
-        controller.Move(velocity * Time.deltaTime);
-
-        
+        controller.Move(velocity * deltaTime);
 	}
 
     private float GetTargetVelocityX(float inputX)

@@ -50,11 +50,11 @@ public class PlayerInputModel : MonoBehaviour, ICanFire
     void InvokeFire()
     {
         Vector3 direction = Vector3.Normalize(Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position); //WARNING Vector3 stuff. If we do anything with zepth,  we may run into some weirdness here.
-        OnFire(direction);
+        OnFire?.Invoke(direction);
     }
     void InvokeAltFire()
     {
         Vector3 direction = Vector3.Normalize(Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position); //WARNING Vector3 stuff. If we do anything with zepth,  we may run into some weirdness here.
-        OnAltFire(direction);
+        OnAltFire?.Invoke(direction);
     }
 }
