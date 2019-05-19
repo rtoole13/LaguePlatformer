@@ -7,6 +7,9 @@ public class PlayerMovementModel : MovementModel {
     public float jumpHeight = 4;
     public float timeToJumpApex = 0.4f;
 
+    [Range(0f, 1f)]
+    public float idleThreshold = 0.1f;
+
     [SerializeField]
     private float accelerationTimeAirborne = 0.5f;
     [SerializeField]
@@ -35,7 +38,9 @@ public class PlayerMovementModel : MovementModel {
     private float relativeHorizontalSlideDecay = 0.05f;
 
     private PlayerInputModel playerInput;
+    private Animator playerAnimator;
 
+    private bool lookingRight = true;
     private float slipAngleThreshold = 35f;
     private float landingSlideAngleThreshold = 25f;
     private bool isAirborne = false;
@@ -57,6 +62,7 @@ public class PlayerMovementModel : MovementModel {
     {
         base.Awake();
         playerInput = GetComponent<PlayerInputModel>();
+        playerAnimator = GetComponent<Animator>();
     }
     protected override void Start () {
         base.Start();
@@ -85,6 +91,9 @@ public class PlayerMovementModel : MovementModel {
                 //was airborne last frame, just landed
                 recentlyLanded = true;
                 landingVelocity = velocity;
+
+                //animation
+                playerAnimator.SetBool("jumped", false);
             }
             velocity.y = 0;
         }
@@ -96,10 +105,25 @@ public class PlayerMovementModel : MovementModel {
         if (playerInput.jump && controller.collisions.below)
         {
             velocity.y = jumpVelocity;
+
+            //animation
+            playerAnimator.SetBool("jumped", true);
         }
 
         velocity.x = GetTargetVelocityX(input.x);
         velocity.y += gravity * deltaTime;
+
+        if (Mathf.Abs(velocity.x) < idleThreshold)
+        {
+            playerAnimator.SetBool("isRunning", false);
+        }
+        else
+        {
+            playerAnimator.SetBool("isRunning", true);
+        }
+
+        if ((velocity.x < 0 && lookingRight) || (velocity.x > 0 && !lookingRight))
+            FlipLookDirection();
 
         if (effectedByExternalForces)
             applyForces(ref velocity, deltaTime);
@@ -119,6 +143,7 @@ public class PlayerMovementModel : MovementModel {
             float slopeAngle = Vector2.Angle(slopeNormal, Vector2.up);
             if (recentlyLanded && slopeAngle >= landingSlideAngleThreshold)
             {
+
                 //ignore smooth damping
                 return DetermineLandingVelocity(inputX, slopeNormal);
             }
@@ -202,5 +227,12 @@ public class PlayerMovementModel : MovementModel {
         gravity = -2f * jumpHeight / Mathf.Pow(timeToJumpApex, 2f);
         jumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
         print("Gravity: " + gravity + " Jump Velocity: " + jumpVelocity);
+    }
+
+    private void FlipLookDirection()
+    {
+        lookingRight = !lookingRight;
+        Vector3 localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+        transform.localScale = localScale;
     }
 }
