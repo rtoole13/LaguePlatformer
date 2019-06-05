@@ -84,18 +84,23 @@ public class PlayerMovementModel : MovementModel {
         {
             velocity.y = 0;
         }
-        else if (controller.collisions.below)
+        if (controller.collisions.below)
         {
             if (isAirborne)
             {
                 //was airborne last frame, just landed
                 recentlyLanded = true;
                 landingVelocity = velocity;
-
-                //animation
-                playerAnimator.SetBool("jumped", false);
             }
             velocity.y = 0;
+
+            //animation
+            playerAnimator.SetBool("isAirborne", false);
+        }
+        else
+        {
+            //animation
+            playerAnimator.SetBool("isAirborne", true);
         }
         //Get player input
         Vector2 input = playerInput.movement;
