@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 [RequireComponent(typeof(PlayerInputModel))]
 public class PlayerMovementModel : MovementModel {
@@ -9,6 +10,10 @@ public class PlayerMovementModel : MovementModel {
 
     [Range(0f, 1f)]
     public float idleThreshold = 0.1f;
+
+    public float velocityCameraZoomThreshold;
+
+    private bool cameraClose = true;
 
     [SerializeField]
     private float accelerationTimeAirborne = 0.5f;
@@ -56,7 +61,6 @@ public class PlayerMovementModel : MovementModel {
     private float slideVelocityStopThreshold;
     private float slideVelocityThreshold;
     
-    
 
     protected override void Awake()
     {
@@ -64,6 +68,7 @@ public class PlayerMovementModel : MovementModel {
         playerInput = GetComponent<PlayerInputModel>();
         playerAnimator = GetComponent<Animator>();
     }
+
     protected override void Start () {
         base.Start();
         ResetGravity();
@@ -79,6 +84,7 @@ public class PlayerMovementModel : MovementModel {
         float deltaTime = Time.deltaTime;
         recentlyLanded = false;
 
+        PossiblyZoomCamera();
         //collision from above or below, stop velocity y
         if (controller.collisions.above)
         {
@@ -136,6 +142,16 @@ public class PlayerMovementModel : MovementModel {
         isAirborne = !controller.collisions.below;
         controller.Move(velocity * deltaTime);
 	}
+
+    private void PossiblyZoomCamera()
+    {
+        if (velocity.magnitude > velocityCameraZoomThreshold)
+        {
+            cameraClose = false;
+            return;
+        }
+        cameraClose = true;
+    }
 
     private float GetTargetVelocityX(float inputX)
     {

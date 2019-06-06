@@ -15,6 +15,7 @@ public class MovementModel : MonoBehaviour, IForceAffected
     protected float gravity = -40f;
     protected MovementController controller;
     protected Vector2 velocity;
+    
 
     protected virtual void Awake()
     {

@@ -10,11 +10,7 @@ public class PlayerInputModel : MonoBehaviour, ICanFire
     public bool jump { get; private set; }
     
     #region EVENTS
-    //delegates
-    public delegate void JumpAction();
-
     //events
-    public event JumpAction OnJump;
     public event FireAction OnFire;
     public event AltFireAction OnAltFire;
     #endregion //EVENTS

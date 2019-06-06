@@ -10,6 +10,9 @@ public class GrenadeLauncher : MonoBehaviour
     [Range(0f,1f)]
     public float drag;
 
+    [SerializeField]
+    private Transform weaponOrigin;
+
     private ICanFire fireInput;
 
     void Awake()
@@ -25,7 +28,7 @@ public class GrenadeLauncher : MonoBehaviour
 
     void HandleFire(Vector2 direction)
     {
-        var spawnedProjectile = Instantiate(projectile, gameObject.transform.position, Quaternion.identity);
+        var spawnedProjectile = Instantiate(projectile, weaponOrigin.position, Quaternion.identity);
         spawnedProjectile.Initialize(initialSpeed * direction, drag, fireInput);
     }
 }
