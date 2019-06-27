@@ -4,6 +4,11 @@ using System;
 
 [RequireComponent(typeof(PlayerInputModel))]
 public class PlayerMovementModel : MovementModel {
+    #region EVENTS
+    public delegate void CameraZoomTo(bool closeView);
+
+    public event CameraZoomTo OnZoomChange;
+    #endregion
 
     public float jumpHeight = 4;
     public float timeToJumpApex = 0.4f;
@@ -12,7 +17,6 @@ public class PlayerMovementModel : MovementModel {
     public float idleThreshold = 0.1f;
 
     public float velocityCameraZoomThreshold;
-
     private bool cameraClose = true;
 
     [SerializeField]
@@ -145,12 +149,19 @@ public class PlayerMovementModel : MovementModel {
 
     private void PossiblyZoomCamera()
     {
-        if (velocity.magnitude > velocityCameraZoomThreshold)
+        //NOTE only makes sense if a camera is listening ;)
+        if (cameraClose && (velocity.magnitude > velocityCameraZoomThreshold))
         {
+            Debug.Log("To Far!");
             cameraClose = false;
-            return;
+            InvokeCameraZoom();
         }
-        cameraClose = true;
+        else if (!cameraClose && (velocity.magnitude <= velocityCameraZoomThreshold))
+        {
+            Debug.Log("To Close!");
+            cameraClose = true;
+            InvokeCameraZoom();
+        }
     }
 
     private float GetTargetVelocityX(float inputX)
@@ -255,5 +266,10 @@ public class PlayerMovementModel : MovementModel {
         lookingRight = !lookingRight;
         Vector3 localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
         transform.localScale = localScale;
+    }
+
+    void InvokeCameraZoom()
+    {
+        OnZoomChange?.Invoke(cameraClose);
     }
 }
