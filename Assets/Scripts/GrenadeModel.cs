@@ -53,7 +53,6 @@ public class GrenadeModel : ProjectileMovementModel
                     {
                         float damage = damageMinimum + damageDifference * normalizedDistance;
                         damageable.TakeDamage((int)damage);
-                        Debug.Log("Grenade dealt " + damage + " to " + hit.collider.gameObject.name);
                     }
                 }
             }

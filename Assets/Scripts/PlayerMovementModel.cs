@@ -158,6 +158,10 @@ public class PlayerMovementModel : MovementModel {
         }
         else if (!cameraClose && (velocity.magnitude <= velocityCameraZoomThreshold))
         {
+            if (isAirborne)
+            {
+                return;
+            }
             Debug.Log("To Close!");
             cameraClose = true;
             InvokeCameraZoom();
