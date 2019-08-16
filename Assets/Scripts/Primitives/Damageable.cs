@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.Events;
 public class Damageable : MonoBehaviour, IDamageable
 {
     [SerializeField]
@@ -8,6 +8,8 @@ public class Damageable : MonoBehaviour, IDamageable
 
     protected int currentHealth;
 
+    [SerializeField]
+    private UnityEvent hasDied = new UnityEvent();
     private List<DamageOverTime> activeDOTs = new List<DamageOverTime>();
 
     void Start()
@@ -27,18 +29,19 @@ public class Damageable : MonoBehaviour, IDamageable
             if (DOT.CheckTime())
             {
                 Debug.Log("damge");
-                TakeDamage(DOT.damagePerTick);
+                TakeDamage(DOT.damagePerTick, false);
             }
             if (!DOT.isActive)
                 activeDOTs.RemoveAt(i);
         }
     }
 
-    public virtual void TakeDamage(int damage)
+    public virtual void TakeDamage(int damage, bool isExplosive)
     {
         currentHealth -= damage;
         if (currentHealth < 1) {
-            Destroy(gameObject);
+            hasDied?.Invoke();
+            currentHealth = maxHealth;
         }
     }
 

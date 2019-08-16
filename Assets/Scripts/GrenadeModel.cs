@@ -52,7 +52,7 @@ public class GrenadeModel : ProjectileMovementModel
                     if (damageable != null)
                     {
                         float damage = damageMinimum + damageDifference * normalizedDistance;
-                        damageable.TakeDamage((int)damage);
+                        damageable.TakeDamage((int)damage, true);
                     }
                 }
             }
